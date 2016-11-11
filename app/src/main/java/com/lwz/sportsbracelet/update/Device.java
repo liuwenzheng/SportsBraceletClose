@@ -20,6 +20,7 @@ public class Device implements Parcelable, Comparable<Device> {
     public String address;
     public int rssi;
     public int status;
+    public byte[] scanRecord;
 
 
     @Override
@@ -32,6 +33,7 @@ public class Device implements Parcelable, Comparable<Device> {
         return 0;
     }
 
+
     @Override
     public int describeContents() {
         return 0;
@@ -43,6 +45,7 @@ public class Device implements Parcelable, Comparable<Device> {
         dest.writeString(this.address);
         dest.writeInt(this.rssi);
         dest.writeInt(this.status);
+        dest.writeByteArray(this.scanRecord);
     }
 
     public Device() {
@@ -53,6 +56,7 @@ public class Device implements Parcelable, Comparable<Device> {
         this.address = in.readString();
         this.rssi = in.readInt();
         this.status = in.readInt();
+        this.scanRecord = in.createByteArray();
     }
 
     public static final Creator<Device> CREATOR = new Creator<Device>() {

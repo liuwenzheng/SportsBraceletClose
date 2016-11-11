@@ -47,6 +47,8 @@ public class InitActivity extends Activity implements OnClickListener {
     EditText etOverTime;
     @InjectView(R.id.et_filter_rssi)
     EditText etFilterRssi;
+    @InjectView(R.id.et_filter_version)
+    EditText et_filter_version;
     private DeviceAdapter mAdapter;
     private ArrayList<Device> devices;
     private BTService mBtService;
@@ -98,10 +100,11 @@ public class InitActivity extends Activity implements OnClickListener {
         bindService(new Intent(this, BTService.class), mServiceConnection,
                 BIND_AUTO_CREATE);
         btnClose.setEnabled(false);
-        etOverTime.setText(SPUtiles.getStringValue("overTime", "2"));
+        etOverTime.setText(SPUtiles.getStringValue("overTime", "10"));
         etFilterName.setText(SPUtiles.getStringValue("filterName", ""));
         etScanPeriod.setText(SPUtiles.getStringValue("scanPeriod", "5"));
-        etFilterRssi.setText(SPUtiles.getStringValue("filterRssi", "-60"));
+        etFilterRssi.setText(SPUtiles.getStringValue("filterRssi", "-100"));
+        et_filter_version.setText(SPUtiles.getStringValue("filterVersion", "1.0.0"));
     }
 
     @Override
@@ -161,17 +164,77 @@ public class InitActivity extends Activity implements OnClickListener {
                     if (Integer.valueOf(bleDevice.rssi) <= mFilterRssi) {
                         return;
                     }
-                    if (!devicesMaps.containsKey(bleDevice.address)) {
-                        devicesMaps.put(bleDevice.address, bleDevice);
-                        devices.add(bleDevice);
+                    if (!TextUtils.isEmpty(et_filter_version.getText().toString())) {
+                        byte[] scanRecord = bleDevice.scanRecord;
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < scanRecord.length; i++) {
+                            sb.append(Utils.byte2HexString(scanRecord[i]));
+                            if (i < scanRecord.length - 1) {
+                                sb.append(" ");
+                            }
+                            if (i % 15 == 1)
+                                sb.append("\n");
+                        }
+                        LogModule.i(sb.toString());
+                        int index = 0;
+                        for (int i = 0; i < scanRecord.length; i++) {
+                            if ("0a".equals(Utils.byte2HexString(scanRecord[i]))
+                                    && "ff".equals(Utils.byte2HexString(scanRecord[i + 1]))) {
+                                index = i + 8;
+                                break;
+                            }
+                        }
+                        if (index == 0) {
+                            return;
+                        }
+                        LogModule.i(index + "");
+                        LogModule.i(et_filter_version.getText().toString() + "");
+                        String[] s = et_filter_version.getText().toString().split("\\.");
+                        if (s.length != 3) {
+                            return;
+                        }
+                        String s1 = Utils.decodeToHex(s[0]);
+                        String s2 = Utils.decodeToHex(s[1]);
+                        String s3 = Utils.decodeToHex(s[2]);
+                        if (s1.length() == 1) {
+                            s1 = "0" + s1;
+                        }
+                        if (s2.length() == 1) {
+                            s2 = "0" + s2;
+                        }
+                        if (s3.length() == 1) {
+                            s3 = "0" + s3;
+                        }
+                        LogModule.i("filter version : " + s1 + "." + s2 + "." + s3);
+                        if (s1.equals(Utils.byte2HexString(scanRecord[index]))
+                                && s2.equals(Utils.byte2HexString(scanRecord[index + 1]))
+                                && s3.equals(Utils.byte2HexString(scanRecord[index + 2]))) {
+                            if (!devicesMaps.containsKey(bleDevice.address)) {
+                                devicesMaps.put(bleDevice.address, bleDevice);
+                                devices.add(bleDevice);
+                            } else {
+                                return;
+                            }
+                            Collections.sort(devices);
+                            mAdapter.setDevices(devices);
+                            mAdapter.notifyDataSetChanged();
+                            if (devices.size() >= 30) {
+                                mBtService.stopLeScan();
+                            }
+                        }
                     } else {
-                        return;
-                    }
-                    Collections.sort(devices);
-                    mAdapter.setDevices(devices);
-                    mAdapter.notifyDataSetChanged();
-                    if (devices.size() >= 30) {
-                        mBtService.stopLeScan();
+                        if (!devicesMaps.containsKey(bleDevice.address)) {
+                            devicesMaps.put(bleDevice.address, bleDevice);
+                            devices.add(bleDevice);
+                        } else {
+                            return;
+                        }
+                        Collections.sort(devices);
+                        mAdapter.setDevices(devices);
+                        mAdapter.notifyDataSetChanged();
+                        if (devices.size() >= 30) {
+                            mBtService.stopLeScan();
+                        }
                     }
                 }
                 if (BTConstants.ACTION_BLE_DEVICES_DATA_END.equals(intent
@@ -300,6 +363,8 @@ public class InitActivity extends Activity implements OnClickListener {
                 SPUtiles.setStringValue("scanPeriod", etScanPeriod.getText().toString());
                 String filterRssi = etFilterRssi.getText().toString();
                 SPUtiles.setStringValue("filterRssi", filterRssi);
+                String filterVersion = et_filter_version.getText().toString();
+                SPUtiles.setStringValue("filterVersion", filterVersion);
                 mFilterRssi = TextUtils.isEmpty(filterRssi) ? -1000 : Integer.parseInt(filterRssi);
                 break;
         }

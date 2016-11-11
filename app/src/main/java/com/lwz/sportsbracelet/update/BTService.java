@@ -215,41 +215,17 @@ public class BTService extends Service implements LeScanCallback {
                 return;
             }
             LogModule.i(device.getName());
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < scanRecord.length; i++) {
-                sb.append(Utils.byte2HexString(scanRecord[i]));
-                if (i < scanRecord.length - 1) {
-                    sb.append(" ");
-                }
-                if (i % 15 == 1)
-                    sb.append("\n");
-            }
-            LogModule.i(sb.toString());
-            int index = 0;
-            for (int i = 0; i < scanRecord.length; i++) {
-                if ("0a".equals(Utils.byte2HexString(scanRecord[i]))
-                        && "ff".equals(Utils.byte2HexString(scanRecord[i + 1]))) {
-                    index = i + 8;
-                    break;
-                }
-            }
-            if (index == 0) {
-                return;
-            }
-            LogModule.i(index + "");
-            if ("01".equals(Utils.byte2HexString(scanRecord[index]))
-                    && "00".equals(Utils.byte2HexString(scanRecord[index + 1]))
-                    && "00".equals(Utils.byte2HexString(scanRecord[index + 2]))) {
-                Device bleDevice = new Device();
-                bleDevice.name = device.getName();
-                bleDevice.address = device.getAddress();
-                bleDevice.rssi = rssi;
-                bleDevice.status = Device.STATUS_CONN_FALSE;
-                Intent intent = new Intent(BTConstants.ACTION_BLE_DEVICES_DATA);
-                intent.putExtra("device", bleDevice);
-                sendBroadcast(intent);
-                // mDevices.add(bleDevice);
-            }
+
+            Device bleDevice = new Device();
+            bleDevice.name = device.getName();
+            bleDevice.address = device.getAddress();
+            bleDevice.rssi = rssi;
+            bleDevice.status = Device.STATUS_CONN_FALSE;
+            bleDevice.scanRecord = scanRecord;
+            Intent intent = new Intent(BTConstants.ACTION_BLE_DEVICES_DATA);
+            intent.putExtra("device", bleDevice);
+            sendBroadcast(intent);
+            // mDevices.add(bleDevice);
         }
     }
 
