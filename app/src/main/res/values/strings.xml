@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">发送DFU命令程序</string>
+    <string name="scan_device">正在扫描手环</string>
+    <string name="match_device">手机与手环正在配对</string>
+    <string name="close_device">手机已发送发送DUF</string>
+
+
+    <string name="scan">扫描手环</string>
+    <string name="sleep">发送DUF</string>
+    <string name="clear">清空列表</string>
+    <string name="write_sn">发送SN</string>
+    <string name="read_sn">读取SN</string>
+    <string name="setting_device_conn_success">配对成功</string>
+    <string name="setting_device_conn_failure">配对失败</string>
+    <string name="setting_device_search">正在搜索手环</string>
+    <string name="device_size">手环数量：%1$s个</string>
+    <string name="sync_time_success">同步时间成功</string>
+    <string name="sync_touch_success">复位按键成功</string>
+    <string name="sync_sleep_success">设置休眠成功</string>
+    <string name="sync_sn_success">烧码成功</string>
+    <string name="read_sn_back">读取SN返回值为：%1$s</string>
+    <string name="write_sn_back">发送SN返回值为：%1$s</string>
+</resources>

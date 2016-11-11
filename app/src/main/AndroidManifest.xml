@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.lwz.sportsbracelet.update">
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!-- 按时required为true时，则应用只能在支持BLE的Android设备上安装运行；required为false时，Android设备均可正常安装运行 -->
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Holo.Light.NoActionBar">
+        <activity
+            android:name="com.lwz.sportsbracelet.update.InitActivity"
+            android:configChanges="orientation|mcc|mnc|keyboard|keyboardHidden|locale|touchscreen|navigation|fontScale"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service android:name="com.lwz.sportsbracelet.update.BTService"></service>
+    </application>
+
+</manifest>
